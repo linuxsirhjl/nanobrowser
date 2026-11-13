@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Listener Test</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .container {
+      margin: 20px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    .clickable-span {
+      cursor: pointer;
+      color: blue;
+      text-decoration: underline;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      background: #f0f0f0;
+      min-height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Click Listener Detection Test</h1>
+
+  <div class="container">
+    <h2>Test Case 1: Span with click listener (like the reported issue)</h2>
+    <span class="mt10 clickable-span" id="span-with-click">转文字</span>
+    <p>This span has a click event listener but no ARIA role or semantic meaning.</p>
+  </div>
+
+  <div class="container">
+    <h2>Test Case 2: Regular span without click listener</h2>
+    <span class="mt10">普通文本</span>
+    <p>This span has no click listener and should NOT be actionable.</p>
+  </div>
+
+  <div class="container">
+    <h2>Test Case 3: Div with click listener</h2>
+    <div class="clickable-span" id="div-with-click">Click me div</div>
+    <p>This div has a click listener.</p>
+  </div>
+
+  <div class="container">
+    <h2>Test Case 4: Nested click listeners (both should get refs)</h2>
+    <div class="clickable-span" id="outer-click">
+      Outer clickable
+      <span class="clickable-span" id="inner-click">Inner span click</span>
+    </div>
+    <p>Both the outer div and inner span have click listeners and text content, so both should be actionable.</p>
+  </div>
+
+  <div class="container">
+    <h2>Test Case 4b: Nested click listeners (inner without text should be skipped)</h2>
+    <div class="clickable-span" id="outer-click-2">
+      Outer clickable with text
+      <span id="icon-span" style="width: 20px; height: 20px; display: inline-block; background: #ccc;"></span>
+    </div>
+    <p>The inner span is an icon with no text, so it should be skipped (clicking outer is enough).</p>
+  </div>
+
+  <div class="container">
+    <h2>Test Case 5: Span inside non-clickable container</h2>
+    <div style="border: 1px solid red; padding: 10px;">
+      <span class="clickable-span" id="span-in-container">Span with listener inside plain div</span>
+    </div>
+    <p>This span with click listener is inside a non-clickable container.</p>
+  </div>
+
+  <div class="container">
+    <h2>Test Case 6: Dynamic click listener (added after page load)</h2>
+    <span class="mt10 clickable-span" id="dynamic-click">Dynamic listener (not attached yet)</span>
+    <button id="add-listener-btn">Add Click Listener to Span Above</button>
+    <p>Click the button to dynamically add a listener (this tests if snapshots detect runtime listeners).</p>
+  </div>
+
+  <div id="result">
+    <strong>Click results will appear here</strong>
+  </div>
+
+  <script>
+    const result = document.getElementById('result');
+
+    function handleClick(event) {
+      const text = event.target.textContent || event.target.id;
+      result.innerHTML = `<strong>Clicked:</strong> ${text} (id: ${event.target.id || 'none'})`;
+      console.log('Clicked:', event.target);
+    }
+
+    // Test case 1: Span with click listener
+    document.getElementById('span-with-click').addEventListener('click', handleClick);
+
+    // Test case 3: Div with click listener
+    document.getElementById('div-with-click').addEventListener('click', handleClick);
+
+    // Test case 4: Nested click listeners
+    document.getElementById('outer-click').addEventListener('click', function(e) {
+      result.innerHTML = `<strong>Clicked outer:</strong> ${e.target.id}`;
+    });
+    document.getElementById('inner-click').addEventListener('click', function(e) {
+      result.innerHTML = `<strong>Clicked inner:</strong> ${e.target.id}`;
+      e.stopPropagation(); // Prevent outer from firing
+    });
+
+    // Test case 4b: Nested with icon (no text)
+    document.getElementById('outer-click-2').addEventListener('click', function(e) {
+      result.innerHTML = `<strong>Clicked outer-2:</strong> ${e.target.id}`;
+    });
+    document.getElementById('icon-span').addEventListener('click', function(e) {
+      result.innerHTML = `<strong>Clicked icon:</strong> icon-span`;
+      e.stopPropagation();
+    });
+
+    // Test case 5: Span inside container
+    document.getElementById('span-in-container').addEventListener('click', handleClick);
+
+    // Test case 6: Dynamic listener
+    document.getElementById('add-listener-btn').addEventListener('click', function() {
+      const span = document.getElementById('dynamic-click');
+      span.addEventListener('click', handleClick);
+      span.textContent = 'Dynamic listener (NOW ATTACHED)';
+      result.innerHTML = '<strong>Listener added!</strong> Try clicking the span above.';
+    });
+  </script>
+</body>
+</html>

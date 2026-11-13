@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Span with click listener</title><link rel="stylesheet" href="/style.css">
+<style>
+  .mt10 { margin-top: 10px; display: inline-block; }
+  .result { margin-top: 20px; padding: 10px; background: #f0f0f0; }
+</style></head>
+<body>
+<h1>Span with click listener test</h1>
+
+<p>Test case from the bug report:</p>
+<span class="mt10">转文字</span>
+
+<p>Additional test cases:</p>
+<div>
+  <span id="standalone-span">Standalone span with listener</span>
+</div>
+
+<div id="container" style="border: 1px solid #ccc; padding: 10px;">
+  <span id="span-in-div">Span with listener inside plain div</span>
+</div>
+
+<div class="result" id="result">Click result will appear here</div>
+
+<script>
+  const result = document.getElementById('result');
+
+  // The reported case: span with class mt10
+  document.querySelector('.mt10').addEventListener('click', function() {
+    result.textContent = 'Clicked: 转文字';
+    console.log('Clicked 转文字');
+  });
+
+  // Standalone span
+  document.getElementById('standalone-span').addEventListener('click', function() {
+    result.textContent = 'Clicked: Standalone span';
+  });
+
+  // Span inside a container
+  document.getElementById('span-in-div').addEventListener('click', function() {
+    result.textContent = 'Clicked: Span in div';
+  });
+</script>
+</body>
+</html>
